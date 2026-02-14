@@ -33,5 +33,24 @@ For developers:
 - **Guaranteed minimum render count**. Renders are batched per frame. Also no multi-frames cascading rerenders from wrongly ordered state changes.
 - **Minimal DOM nodes**. A clean, wrapper-divs-free inspector experience.
 
-## Architecture
-![IMG_6937](https://github.com/user-attachments/assets/caee340e-cc75-4611-9d81-bc31aca0457b)
+## UI Architecture
+
+It's essentially a simplified game engine loop:
+
+```
+Initialization (done once, all upfront):
+  State declaration
+  Static DOM chunks
+  Events registration (leverage event delegation to make this happen)
+
+Render:
+  DOM reads (batched, to avoid DOM read/write interleaving's catastrophic perf degradation)
+  State changes, in this order:
+    Handle inputs
+    New layout & cursor
+    Animation tick
+    Commit state changes
+  Occlusion & DOM writes (batched, same reason)
+  schedule next render (e.g. if animating)
+```
+Only events and render's final step can schedule a next render
